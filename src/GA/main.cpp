@@ -75,7 +75,7 @@ void main() {
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }
 )";
-
+// Fragment shader implementando o modelo de iluminação Phong
 const char* fragmentShaderSource = R"(
 #version 330 core
 
@@ -99,6 +99,7 @@ uniform vec3 ks;
 uniform float shininess;
 
 void main() {
+    
     if (isWireframe) {
         color = vec4(wireframeColor, 1.0);
         return;
@@ -122,22 +123,23 @@ void main() {
 )";
 
 // ---------- LOADER OBJ ----------
+
+// Função para carregar um arquivo OBJ, retornando um MeshData com os vértices e normais intercalados
 MeshData loadOBJ(const char* path)
 {
     namespace fs = std::filesystem;
     fs::path objFile = fs::path(__FILE__).parent_path() / path;
-
     ifstream file(objFile);
     if (!file.is_open()) {
         cout << "Erro ao abrir OBJ\n";
         return { nullptr, 0 };
     }
-
+    // Vetores temporários para posições, normais e índices
     vector<glm::vec3> tempV;
     vector<glm::vec3> tempVN;
     vector<int> vIndex;
     vector<int> vnIndex;
-
+    // Ler o arquivo linha por linha
     string line;
     while (getline(file, line)) {
         stringstream ss(line);
@@ -159,7 +161,8 @@ MeshData loadOBJ(const char* path)
             ss >> v1 >> v2 >> v3;
 
             vector<string> verts = { v1, v2, v3 };
-
+            // Cada vértice tem formato "vIndex/vtIndex/vnIndex" ou "vIndex//vnIndex"
+            // vindex significa posição, vnIndex significa normal. vtIndex para textura (não usado)
             for (auto& token : verts) {
                 string a, b, c;
                 stringstream vs(token);
@@ -175,12 +178,12 @@ MeshData loadOBJ(const char* path)
 
     int count = vIndex.size();
     float* vertices = new float[count * 6];
-
+    // Intercalar posição e normal (6 floats por vértice)
     int idx = 0;
     for (int i = 0; i < count; i++) {
         glm::vec3 v = tempV[vIndex[i]];
         glm::vec3 n = (vnIndex[i] >= 0) ? tempVN[vnIndex[i]] : glm::vec3(0,1,0);
-
+        // array de floats: vx, vy, vz, nx, ny, nz
         vertices[idx++] = v.x;
         vertices[idx++] = v.y;
         vertices[idx++] = v.z;
@@ -194,6 +197,8 @@ MeshData loadOBJ(const char* path)
 }
 
 // ---------- VAO ----------
+
+// Cria um VAO para o mesh, intercalando posições e normais (6 floats por vértice)
 GLuint createVAO(MeshData mesh)
 {
     GLuint VAO, VBO;
@@ -279,6 +284,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     // Escala (UP, DOWN) - Modo S
     if (modoAtual == SCALE) {
         if (key == GLFW_KEY_UP && action != GLFW_RELEASE) {
+            // speed é a quantidade de aumento por segundo, multiplicamos por deltaTime do programa para ter um aumento suave
             objetos[selecionado].scale.x += speed;
             objetos[selecionado].scale.y += speed;
             objetos[selecionado].scale.z += speed;
@@ -297,14 +303,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // ---------- SHADER ----------
 GLuint createShader()
 {
+    // Criar e compilar vertex shader usando a string vertexShaderSource
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertexShaderSource, NULL);
     glCompileShader(vs);
-
+    
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragmentShaderSource, NULL);
     glCompileShader(fs);
-
+    
     GLuint prog = glCreateProgram();
     glAttachShader(prog, vs);
     glAttachShader(prog, fs);
@@ -407,7 +414,7 @@ int main()
             model = glm::scale(model, objetos[i].scale);
 
             glUniformMatrix4fv(glGetUniformLocation(shader,"model"),1,GL_FALSE,glm::value_ptr(model));
-
+            // Enviar material para o shader
             glUniform3fv(glGetUniformLocation(shader,"ka"),1,glm::value_ptr(objetos[i].ka));
             glUniform3fv(glGetUniformLocation(shader,"kd"),1,glm::value_ptr(objetos[i].kd));
             glUniform3fv(glGetUniformLocation(shader,"ks"),1,glm::value_ptr(objetos[i].ks));
