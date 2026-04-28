@@ -364,9 +364,10 @@ int main()
         objetos[i].pos = glm::vec3(i*3.0f-3.0f,0,0);
         objetos[i].rot = glm::vec3(0);
         objetos[i].scale = glm::vec3(1);
-
         objetos[i].ka = glm::vec3(0.2f);
-        objetos[i].kd = glm::vec3(0.7f);
+        objetos[0].kd = glm::vec3(1.0f, 0.0f, 0.0f);
+        objetos[1].kd = glm::vec3(0.0f, 1.0f, 0.0f);
+        objetos[2].kd = glm::vec3(0.0f, 0.0f, 1.0f);
         objetos[i].ks = glm::vec3(1.0f);
         objetos[i].shininess = 32.0f;
     }
