@@ -12,7 +12,7 @@ Detalhes tecnicos:
 
 A maioria das instruções do programa como o LoaderObj e callbacks são executadas pela CPU, enquanto a GPU é encarregada de criar e transformar os vertices, criar os shaders e iluminação e assim dando output dos pixels na tela, existe algumas tarefas no qual a CPU trabalha com a GPU, sendo elas, arrays de vertices da CPU para a memoria da GPU, pointes para dizer a GPU como ler dados do vertex e tambem instruções da CPU para a GPU de quando executar outras funções como desenhar os vertices.
 
-MeshData e Objeto são structs para armazenar dados de vertices e representar objetos 3D com VAO com propriedades, respectivamente.
+MeshData e Objeto são structs para armazenar dados de vertices, assim servindo como uma bandeja de dados para carregar na GPU, e o Objeto serve para representar objetos 3D com VAO com propriedades.
 
 de shaders temos vertex e fragment, o vertex é um shader de vertice para calcular gl_Position que é uma projeção, já o fragment é para a iluminação Phong, com a diferenciação entre wireframe e normal.
 
